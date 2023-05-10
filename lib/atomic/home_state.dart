@@ -8,4 +8,7 @@ class HomeState {
   // ACTIONS
   final setCountCorrectAnswers = Rx<void>(null);
   final setNumbers = Rx<Map<String, int>>({});
+
+  final sumIsCorrect = Rx<int>(0);
+  final returnSumIsCorrect = Rx<bool>(false);
 }

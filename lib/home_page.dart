@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:poc_atomic/usecases/sum_is_correct_usecase.dart';
 
 import 'atomic/home_state.dart';
 import 'usecases/get_random_number_usecase.dart';
@@ -21,15 +22,24 @@ class _HomePageState extends State<HomePage> {
   // se eles ficassem aqui, apesar de tudo funcionar, nâo quebraria o principio que o reducer
   // e o state tentam resolver, de impedir a view de ter conhecimento das regras e ver apenas o estado?
   final GetRandomNumberUsecase getRandomNumberUsecase = Get.find();
-  final SumIsCorrectUsecase sumIsCorrectUsecase = Get.find();
+  // final SumIsCorrectUsecase sumIsCorrectUsecase = Get.find();
 
   final textFieldController = TextEditingController();
+  late StreamSubscription streamSumIsCorrect;
 
   @override
   void initState() {
     super.initState();
 
+    streamSumIsCorrect = state.returnSumIsCorrect.listen(listenerSumIsCorrect);
+
     resetNumbers();
+  }
+
+  @override
+  void dispose() {
+    streamSumIsCorrect.cancel();
+    super.dispose();
   }
 
   void resetNumbers() {
@@ -41,11 +51,10 @@ class _HomePageState extends State<HomePage> {
     textFieldController.clear();
   }
 
-  void checkSum() async {
+  Future<void> listenerSumIsCorrect(bool isCorrect) async {
     // essa função é uma simples representação de como eu usaria o retorno do usecase.
     // esse retorno, na prática, é utilizado dentro de outros reducers/usecases, de tal forma que a execução
     // desses outros reducers/usecases só é possivel caso haja esse retorno.
-    final isCorrect = sumIsCorrectUsecase(int.parse(textFieldController.text));
 
     await showDialog(
       context: context,
@@ -57,6 +66,10 @@ class _HomePageState extends State<HomePage> {
     );
 
     resetNumbers();
+  }
+
+  void checkSum() async {
+    state.sumIsCorrect.trigger(int.parse(textFieldController.text));
   }
 
   @override
